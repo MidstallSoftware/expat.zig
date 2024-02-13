@@ -1,0 +1,11 @@
+.{
+    .name = "expat.zig",
+    .version = "2.6.0",
+    .paths = .{"."},
+    .dependencies = .{
+        .expat = .{
+            .url = "https://github.com/libexpat/libexpat/releases/download/R_2_6_0/expat-2.6.0.tar.gz",
+            .hash = "12203b6e6ec7bb3b967233de8bd51524a16be5e9180dba53160c487394619cfb7626",
+        },
+    },
+}
