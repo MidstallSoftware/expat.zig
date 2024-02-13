@@ -49,5 +49,13 @@ pub fn build(b: *std.Build) void {
         },
     });
 
+    lib.installConfigHeader(configHeader, .{});
+
+    {
+        const install_file = b.addInstallFileWithDir(source.path("lib/expat.h"), .header, "expat.h");
+        b.getInstallStep().dependOn(&install_file.step);
+        lib.installed_headers.append(&install_file.step) catch @panic("OOM");
+    }
+
     b.installArtifact(lib);
 }
