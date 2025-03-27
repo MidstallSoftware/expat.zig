@@ -16,20 +16,27 @@ pub fn build(b: *std.Build) void {
         .PACKAGE_BUGREPORT = "https://github.com/libexpat/libexpat/issues",
         .PACKAGE_NAME = "expat",
         .PACKAGE_STRING = "expat 2.6.0",
+        .PACKAGE_TARNAME = "expat-2.6.0.tar.gz",
+        .PACKAGE_VERSION = "2.6.0",
         .HAVE_GETPAGESIZE = 1,
         .XML_CONTEXT_BYTES = 1,
         .XML_DEV_URANDOM = 1,
         .XML_GE = 1,
+        .off_t = "off_t",
+        .size_t = "size_t",
+    });
+    configHeader.addValue("BYTEORDER", u16, switch (target.result.cpu.arch.endian()) {
+        .little => 1234,
+        .big => 4321,
     });
 
-    const lib = std.Build.Step.Compile.create(b, .{
+    const lib = b.addLibrary(.{
         .name = "expat",
-        .root_module = .{
+        .root_module = b.addModule("expat", .{
             .target = target,
             .optimize = optimize,
             .link_libc = true,
-        },
-        .kind = .lib,
+        }),
         .linkage = linkage,
         .version = .{
             .major = 1,
@@ -50,7 +57,7 @@ pub fn build(b: *std.Build) void {
         },
     });
 
-    lib.installConfigHeader(configHeader, .{});
+    lib.installConfigHeader(configHeader);
 
     {
         const headers: []const []const u8 = &.{
@@ -59,9 +66,7 @@ pub fn build(b: *std.Build) void {
         };
 
         for (headers) |header| {
-            const install_file = b.addInstallFileWithDir(source.path(b.pathJoin(&.{ "lib", header })), .header, header);
-            b.getInstallStep().dependOn(&install_file.step);
-            lib.installed_headers.append(&install_file.step) catch @panic("OOM");
+            lib.installHeader(source.path(b.pathJoin(&.{ "lib", header })), header);
         }
     }
 
